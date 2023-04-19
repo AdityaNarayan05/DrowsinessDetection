@@ -16,6 +16,33 @@ from playsound import playsound
 mixer.init()
 
 
+EYE_AR_THRESH = 0.25
+EYE_AR_CONSEC_FRAMES = 30
+YAWN_THRESH = 20
+alarm_status = False
+alarm_status2 = False
+saying = False
+COUNTER = 0
+eye_music = 0
+ear_music = 0
+
+def alarm():
+    global alarm_status
+    global alarm_status2
+    global saying
+
+    while alarm_status:
+        print('call')
+        mixer.music.load("drows.mp3")
+        mixer.music.play()
+
+    if alarm_status2:
+        print('call')
+        saying = True
+        mixer.music.load("yawn.mp3")
+        mixer.music.play()
+        saying = False
+
 # Function to calculate eye aspect ratio
 def eye_aspect_ratio(eye):
     
@@ -98,8 +125,53 @@ while True:
         lip = shape[48:60]
         cv2.drawContours(frame, [lip], -1, (0, 255, 0), 1)
 
+     # Checking dowsiness state
+        if ear < EYE_AR_THRESH:
+            COUNTER += 1
+         # If closed eye counter exceeds threshold
+            if COUNTER >= EYE_AR_CONSEC_FRAMES:
+                eye_music = eye_music + 1
+                if alarm_status == False:
+                    alarm_status = True
+                    t = Thread(target=alarm)
+                    t.deamon = True
+                    t.start()
+                    
 
-cv2.imshow("Frame", frame)
+                cv2.putText(frame, "DROWSINESS ALERT!", (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                
+
+        else:
+            COUNTER = 0
+            alarm_status = False
+    
+    # checking Yawn state
+        if (distance > YAWN_THRESH):
+                ear_music = ear_music + 1
+                cv2.putText(frame, "Yawn Alert", (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                    
+                if alarm_status2 == False and saying == False:
+                    alarm_status2 = True
+                    t = Thread(target = alarm)
+                    t.deamon = True
+                    t.start()
+        else:
+            alarm_status2 = False
+
+        # if eye_music >=25 or ear_music >= 20:
+        #     mixer.music.play()
+        #     eye_music = 0
+        #     ear_music = 0
+
+        cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(frame, "YAWN: {:.2f}".format(distance), (300, 60),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+
+    cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord("q"):
