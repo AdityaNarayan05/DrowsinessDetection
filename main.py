@@ -1,16 +1,17 @@
 # To find point to point distances
-from scipy.spatial import distance as dist 
-from imutils.video import VideoStream
- # For image processing on images
-from imutils import face_utils
-from threading import Thread # For multi-threading
+import os
+import time
+from threading import Thread  # For multi-threading
+
+import cv2  # For enabling computer vision
 import dlib  # For face landmark detection
-import cv2 # For enabling computer vision
 import imutils
 import numpy as np
+# For image processing on images
+from imutils import face_utils
+from imutils.video import VideoStream
 from pygame import mixer
-import time
-import os
+from scipy.spatial import distance as dist
 
 mixer.init()
 
@@ -24,6 +25,7 @@ saying = False
 COUNTER = 0
 eye_music = 0
 ear_music = 0
+
 
 def alarm():
     global alarm_status
@@ -43,8 +45,10 @@ def alarm():
         saying = False
 
 # Function to calculate eye aspect ratio
+
+
 def eye_aspect_ratio(eye):
-    
+
     upper_eyelid = dist.euclidean(eye[1], eye[5])
     lower_eyelid = dist.euclidean(eye[2], eye[4])
 
@@ -55,8 +59,9 @@ def eye_aspect_ratio(eye):
     return ear
 
 # Function to define shape of the eye
-def final_ear(shape):
 
+
+def final_ear(shape):
     # Left eye starting and ending point
     (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
     # right eye starting and ending point
@@ -86,7 +91,6 @@ def lip_distance(shape):
     return distance
 
 
-
 print("-> Loading the predictor and detector...")
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
@@ -97,21 +101,19 @@ vs = VideoStream().start()
 time.sleep(1)
 
 while True:
-
     frame = vs.read()
     frame = imutils.resize(frame, width=450)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     rects = detector(gray, 0)
-   
+
     for rect in rects:
-  
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
 
         eye = final_ear(shape)
         ear = eye[0]
-        leftEye = eye [1]
+        leftEye = eye[1]
         rightEye = eye[2]
 
         distance = lip_distance(shape)
@@ -124,10 +126,10 @@ while True:
         lip = shape[48:60]
         cv2.drawContours(frame, [lip], -1, (0, 255, 0), 1)
 
-     # Checking dowsiness state
+    # Checking dowsiness state
         if ear < EYE_AR_THRESH:
             COUNTER += 1
-         # If closed eye counter exceeds threshold
+        # If closed eye counter exceeds threshold
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
                 eye_music = eye_music + 1
                 if alarm_status == False:
@@ -135,27 +137,25 @@ while True:
                     t = Thread(target=alarm)
                     t.deamon = True
                     t.start()
-                    
 
                 cv2.putText(frame, "DROWSINESS ALERT!", (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                
 
         else:
             COUNTER = 0
             alarm_status = False
-    
+
     # checking Yawn state
         if (distance > YAWN_THRESH):
-                ear_music = ear_music + 1
-                cv2.putText(frame, "Yawn Alert", (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                    
-                if alarm_status2 == False and saying == False:
-                    alarm_status2 = True
-                    t = Thread(target = alarm)
-                    t.deamon = True
-                    t.start()
+            ear_music = ear_music + 1
+            cv2.putText(frame, "Yawn Alert", (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+
+            if alarm_status2 == False and saying == False:
+                alarm_status2 = True
+                t = Thread(target=alarm)
+                t.deamon = True
+                t.start()
         else:
             alarm_status2 = False
 
@@ -168,7 +168,6 @@ while True:
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         cv2.putText(frame, "YAWN: {:.2f}".format(distance), (300, 60),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
 
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
