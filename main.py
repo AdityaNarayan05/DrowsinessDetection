@@ -11,7 +11,6 @@ import numpy as np
 from pygame import mixer
 import time
 import os
-from playsound import playsound
 
 mixer.init()
 
@@ -39,7 +38,7 @@ def alarm():
     if alarm_status2:
         print('call')
         saying = True
-        mixer.music.load("yawn.mp3")
+        mixer.music.load("Yawn.mp3")
         mixer.music.play()
         saying = False
 
