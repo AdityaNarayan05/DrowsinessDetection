@@ -14,3 +14,15 @@ The tech stack used in this project includes:
 * pygame for playing the alert sounds
 * threading for multi-threading in the alarm function
 * scipy for calculating the distance between points
+
+Some Outputs:
+
+![img2](https://user-images.githubusercontent.com/85832994/233198595-2891e967-e4ce-4a0e-96d5-56e25cfee837.jpg)
+
+![project](https://user-images.githubusercontent.com/85832994/233199052-5fb2658f-359a-4b2b-9134-78dac8ef51b1.png)
+
+![project2](https://user-images.githubusercontent.com/85832994/233198708-6912ac91-f2b9-478e-ab51-262a09242435.png)
+
+
+
+
